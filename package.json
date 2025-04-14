@@ -12,7 +12,7 @@
     "replicad": "^0.19.0",
     "replicad-opencascadejs": "^0.19.0",
     "replicad-threejs-helper": "^0.19.0",
-    "simulabra": "^0.0.1",
+    "simulabra": "github:simulabra/simulabra",
     "three": "^0.175.0"
   }
 }
