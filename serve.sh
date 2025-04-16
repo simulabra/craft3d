@@ -1,3 +1,2 @@
-bun build src/base.js --outdir=out --sourcemap=linked
-cd out
-bun x http-server
+bun x http-server ./out &
+bun build src/base.js --outdir=out --sourcemap=linked --watch

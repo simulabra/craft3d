@@ -1,5 +1,5 @@
-const { draw, drawEllipse, drawCircle } = replicad;
-export const main = () => {
+import { draw, drawEllipse, drawCircle } from 'replicad';
+export function drawBracket() {
   const d = 45;
   const w = 36;
   const mr = d / 2;
@@ -53,4 +53,4 @@ export const main = () => {
       .translateZ(w + mr)
       .translateY(mr);
   return b1.cut(middleHole).rotate(90, [d, 0, 0], [0, 1, 0]);
-};
+}
