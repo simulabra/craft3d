@@ -51,14 +51,12 @@ export default await async function (_, $) {
         const edges = bracket.meshEdges();
         const body = new THREE.BufferGeometry();
         const lines = new THREE.BufferGeometry();
-        console.log('faces', faces);
         syncFaces(body, faces);
         syncLines(lines, edges);
 
-        const testGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const testMaterial = new THREE.MeshNormalMaterial({ flatShading: true });
-        const testMesh = new THREE.Mesh(body, testMaterial);
-        scene.add(testMesh);
+        const bodyMaterial = new THREE.MeshNormalMaterial({ flatShading: false });
+        const bodyMesh = new THREE.Mesh(body, bodyMaterial);
+        scene.add(bodyMesh);
 
         const lineMaterial = new THREE.LineBasicMaterial({ color: 0x333333 });
         const lineSegments = new THREE.LineSegments(lines, lineMaterial);
