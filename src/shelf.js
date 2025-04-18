@@ -8,8 +8,18 @@ export default await async function (_, $) {
       $.Var.new({ name: 'obj' }),
       $.Var.new({ name: 'extrude' }),
       $.Var.new({ name: 'plane', default: 'XY' }),
+      $.Var.new({ name: 'planeOffset', default: 0 }),
+      function startDraw(startX = 0, startY = 0) {
+        if (!this.obj()) {
+          this.obj(replicad.draw());
+          this.obj().movePointerTo([startX, startY]);
+        }
+        return this;
+      },
       function lines(...lines) {
-        this.obj(replicad.draw());
+        if (!this.obj()) {
+          this.obj(replicad.draw());
+        }
         for (const line of lines) {
           this.obj(this.obj().line(...line));
         }
@@ -20,8 +30,17 @@ export default await async function (_, $) {
         this.obj(replicad.drawCircle(radius));
         return this;
       },
+      function sketch() {
+        this.obj(this.obj().sketchOnPlane(this.plane(), this.planeOffset()));
+        return this;
+      },
       function dimensionalize() {
-        return this.obj().sketchOnPlane(this.plane()).extrude(this.extrude());
+        this.sketch();
+        return $.Drawing.new({ obj: this.obj().extrude(this.extrude()) });
+      },
+      function loft(loftTarget) {
+        this.sketch();
+        return $.Drawing.new({ obj: this.obj().loftWith(loftTarget.obj()) });
       }
     ]
   });
@@ -33,14 +52,14 @@ export default await async function (_, $) {
       function fuse(...parts) {
         this.log('fuse');
         for (const part of parts) {
-          this.obj(this.obj().fuse(part.render()));
+          this.obj(this.obj().fuse(part.obj()));
         }
         return this;
       },
       function cut(...parts) {
         this.log('cut');
         for (const part of parts) {
-          this.obj(this.obj().cut(part.render()));
+          this.obj(this.obj().cut(part.obj()));
         }
         return this;
       },
@@ -49,6 +68,10 @@ export default await async function (_, $) {
         this.obj(this.obj().translateX(x).translateY(y).translateZ(z));
         return this;
       },
+      function rotate(deg, pos, rot) {
+        this.obj(this.obj().rotate(deg, pos, rot));
+        return this;
+      }
     ]
   });
 
@@ -96,27 +119,27 @@ export default await async function (_, $) {
         };
         let b1 = drawBracket();
         let b2 = drawBracket();
-        b2 = b2.rotate(90, [0, 0, 0], [1, 0, 0]).translateZ(w);
+        b2 = b2.rotate(90, [0, 0, 0], [1, 0, 0]).translate(0, 0, w);
         b1 = b1.fuse(b2);
-        const loft = replicad.draw()
-          .movePointerTo([0, w])
-          .hLine(0.01)
-          .vLine(0.01).close().sketchOnPlane('YZ');
-        const middle = replicad.draw()
-          .movePointerTo([d, w])
-          .hLine(-d)
-          .vLine(d)
-          .hLine(d)
-          .close()
-          .sketchOnPlane('YZ', d)
-          .loftWith(loft);
+        const ep = 0.01;
+        const loft = $.Sketcher.new({ plane: 'YZ' })
+          .startDraw(0, w)
+          .lines([ep, 0], [0, ep], [-ep, -ep])
+          .sketch();
+        const middle = $.Sketcher.new({
+          plane: 'YZ',
+          planeOffset: d
+        }).startDraw(d, w)
+          .lines([-d, 0], [0, d], [d, 0], [0, -d])
+          .loft(loft);
         b1 = b1.fuse(middle);
-        const middleHole = replicad.drawCircle(1.75)
-          .sketchOnPlane('YZ')
-          .extrude(d)
-          .translateZ(w + mr)
-          .translateY(mr);
-        return b1.cut(middleHole).rotate(90, [d, 0, 0], [0, 1, 0]);
+        const middleHole = $.Sketcher.new({
+          plane: 'YZ',
+          extrude: d
+        }).circle(1.75)
+          .dimensionalize()
+          .translate(0, mr, w + mr);
+        return b1.cut(middleHole).rotate(90, [d, 0, 0], [0, 1, 0]).obj();
       }
     ]
   });
