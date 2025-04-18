@@ -4,7 +4,7 @@ import opencascadeWasm from 'replicad-opencascadejs/src/replicad_single.wasm';
 import { setOC } from 'replicad';
 import * as THREE from 'three';
 import { syncFaces, syncLines } from "replicad-threejs-helper";
-import { drawBracket } from './shelf.js';
+import shelf from './shelf.js';
 
 export default await async function (_, $) {
   $.Class.new({
@@ -180,7 +180,7 @@ export default await async function (_, $) {
           moveSpeed: 50,
         }));
 
-        const bracket = drawBracket();
+        const bracket = $.Bracket.new().render();
         const faces = bracket.mesh();
         const edges = bracket.meshEdges();
         const body = new THREE.BufferGeometry();
@@ -215,6 +215,6 @@ export default await async function (_, $) {
 
 }.module({
   name: 'craft3d',
-  imports: [base],
+  imports: [base, shelf],
 }).load();
 
